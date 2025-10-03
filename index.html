@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terminplaner – Freundlich & Mobil</title>
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --accent:#2563eb;
+      --muted:#6b7280;
+      --danger:#e11d48;
+      --border:#e6e9ef;
+      --radius:12px;
+      --shadow: 0 6px 20px rgba(16,24,40,0.06);
+      --reminder-bg:#fff7cc;
+      --reminder-border:#ffd24d;
+    }
+    body{margin:0;padding:1rem;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:#111827}
+    .container{max-width:1100px;margin:0 auto}
+    h1{font-size:1.4rem;margin:0 0 1rem}
+    .layout{display:grid;grid-template-columns:1fr 420px;gap:1rem}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem}
+    .label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+    input,select,textarea{width:100%;padding:.45rem .6rem;border:1px solid var(--border);border-radius:8px;font-size:1rem}
+    input:focus,select:focus,textarea:focus{outline:2px solid rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.25)}
+    .row{display:flex;gap:.6rem}
+    .row>div{flex:1}
+    .actions{display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap}
+    button{border:0;border-radius:8px;padding:.45rem .7rem;font-size:.95rem;cursor:pointer}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-ghost{background:#f3f4f6}
+    .btn-danger{background:var(--danger);color:#fff}
+    .hr{height:1px;background:var(--border);margin:.8rem 0}
+    .pill{display:inline-block;background:#eef2ff;color:#1e3a8a;padding:.2rem .6rem;border-radius:999px;font-weight:600;font-size:.85rem}
+    .list-title{margin:.7rem 0 .4rem;font-weight:700;color:#1e293b}
+    .apt-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:.8rem;margin-bottom:.6rem;box-shadow:0 4px 12px rgba(16,24,40,0.03)}
+    .apt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;flex-wrap:wrap}
+    .apt-name{font-weight:700;font-size:1rem}
+    .apt-time{font-size:.95rem;color:var(--muted)}
+    .apt-meta{margin-top:.45rem;color:#374151;font-size:.92rem;display:flex;gap:.6rem;flex-wrap:wrap}
+    .meta-pill{background:#f1f5f9;padding:.2rem .5rem;border-radius:8px;font-weight:600;color:#0f172a}
+    .apt-notes{margin-top:.5rem;color:var(--muted);font-size:.9rem}
+    .apt-actions{display:flex;gap:.4rem;margin-top:.6rem;justify-content:flex-end}
+    .small{font-size:.85rem;color:var(--muted)}
+    #reminderBanner{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:var(--reminder-bg);border:1px solid var(--reminder-border);padding:.9rem 1rem;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.12);display:none;z-index:9999;font-weight:700;color:#1f2937;max-width:92%}
+    #reminderBanner.show{display:flex;justify-content:space-between;align-items:center;gap:.8rem;animation:pulse 1s ease-in-out infinite}
+    #reminderBanner button{flex-shrink:0}
+    @keyframes pulse{0%{box-shadow:0 0 0 rgba(255,210,77,0.12)}50%{box-shadow:0 12px 30px rgba(255,210,77,0.22)}100%{box-shadow:0 0 0 rgba(255,210,77,0.12)}}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Terminannahme — übersichtlich</h1>
+  <div class="layout">
+    <!-- Form -->
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:.6rem">Neuen Termin anlegen</div>
+      <form id="aptForm" onsubmit="Planner.saveAppointment(event)">
+        <input type="hidden" id="editId" />
+        <label class="label" for="name">Name</label>
+        <input id="name" list="nameList" required />
+        <datalist id="nameList"></datalist>
+        <label class="label" for="phone">Telefonnummer (optional)</label>
+        <input id="phone" type="tel"/>
+        <div class="row" style="margin-top:.6rem">
+          <div><label class="label" for="date">Datum</label><input id="date" type="date" required/></div>
+          <div style="width:150px"><label class="label" for="time">Uhrzeit</label><input id="time" type="time" required/></div>
+        </div>
+        <label class="label" for="persons" style="margin-top:.6rem">Personenanzahl</label>
+        <select id="persons" required>
+          <option value="">Bitte auswählen</option>
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option>
+        </select>
+        <label class="label" for="payment" style="margin-top:.6rem">Zahlungsart</label>
+        <select id="payment" required>
+          <option value="">Bitte auswählen</option>
+          <option>Bar</option><option>EC</option><option>Rechnung</option><option>Transportschein</option>
+        </select>
+        <label class="label" for="notes" style="margin-top:.6rem">Anmerkungen</label>
+        <textarea id="notes" rows="3"></textarea>
+        <div class="hr"></div>
+        <div class="pill">📍 Startadresse</div>
+        <input id="startAddr" type="text" style="margin-top:.3rem"/>
+        <div class="pill" style="margin-top:.6rem">🏁 Zieladresse</div>
+        <input id="zielAddr" type="text" style="margin-top:.3rem"/>
+        <div class="actions">
+          <button class="btn-primary" type="submit">💾 Speichern</button>
+          <button class="btn-ghost" type="button" onclick="Planner.resetForm()">Zurücksetzen</button>
+          <button class="btn-danger" type="button" onclick="Planner.clearAll()">🗑️ Alle löschen</button>
+        </div>
+      </form>
+    </div>
+    <!-- List -->
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:.5rem">Terminliste</div>
+      <div id="aptList"></div>
+      <div id="counter" style="margin-top:.6rem;color:var(--muted);font-size:.9rem">0 Termine</div>
+    </div>
+  </div>
+</div>
+
+<div id="reminderBanner"></div>
+
+<script>
+const STORAGE={names:'planner_names_v4',apts:'planner_apts_v4'};
+const $=(s,r=document)=>r.querySelector(s);
+const Planner={
+ state:{names:[],apts:[]},
+ reminderInterval:null,notifRequested:false,activeReminder:null,
+ init(){
+  this.state.names=this._load(STORAGE.names,[]);
+  this.state.apts=this._load(STORAGE.apts,[]);
+  this._refreshNameList();
+  $('#date').value=new Date().toISOString().slice(0,10);
+  this._renderList();
+  this.checkReminders();
+  this.reminderInterval=setInterval(()=>this.checkReminders(),30000);
+ },
+ _load(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}},
+ _save(k,v){localStorage.setItem(k,JSON.stringify(v))},
+ _refreshNameList(){ $('#nameList').innerHTML=this.state.names.map(n=>`<option value="${this._esc(n)}">`).join('') },
+ saveAppointment(e){e.preventDefault();
+  const name=$('#name').value.trim(); if(!name)return alert("Name fehlt");
+  const apt={id:$('#editId').value||Date.now(),name,phone:$('#phone').value.trim(),
+   date:$('#date').value,time:$('#time').value,persons:$('#persons').value,
+   payment:$('#payment').value,notes:$('#notes').value,startAddr:$('#startAddr').value,
+   zielAddr:$('#zielAddr').value,reminded:false};
+  if(!this.state.names.includes(name)){this.state.names.push(name);this.state.names.sort();this._save(STORAGE.names,this.state.names);this._refreshNameList();}
+  const idx=this.state.apts.findIndex(a=>a.id==apt.id);if(idx>=0)this.state.apts[idx]=apt;else this.state.apts.push(apt);
+  this.state.apts.sort((a,b)=>this._dt(a)-this._dt(b));
+  this._save(STORAGE.apts,this.state.apts);this._renderList();this.resetForm();this.checkReminders();
+ },
+ _renderList(){
+  const container=$('#aptList'); if(!this.state.apts.length){container.innerHTML="<div style='color:var(--muted);padding:.6rem'>Keine Termine</div>";$('#counter').textContent="0 Termine";return;}
+  const groups={heute:[],morgen:[],spaeter:[]}; const now=new Date(); const todayStr=now.toISOString().slice(0,10);
+  const tomorrow=new Date(now);tomorrow.setDate(now.getDate()+1);const tomorrowStr=tomorrow.toISOString().slice(0,10);
+  for(const a of this.state.apts){if(a.date===todayStr)groups.heute.push(a);else if(a.date===tomorrowStr)groups.morgen.push(a);else groups.spaeter.push(a);}
+  let html=""; const renderGroup=(title,arr)=>{if(arr.length){html+=`<div class="list-title">${title}</div>`;html+=arr.map(a=>this._aptCard(a)).join('');}};
+  renderGroup("Heute",groups.heute);renderGroup("Morgen",groups.morgen);renderGroup("Später",groups.spaeter);
+  container.innerHTML=html;$('#counter').textContent=`${this.state.apts.length} Termin(e)`;
+ },
+ _aptCard(a){const dt=this._dt(a);const dateStr=dt?dt.toLocaleDateString("de-DE"):a.date;const time=a.time||"";
+  return `<div class="apt-card"><div class="apt-top"><div><div class="apt-name">${this._esc(a.name)}</div><div class="small">${this._esc(a.phone||"")}</div></div>
+  <div class="apt-time">${dateStr} ${time}</div></div>
+  <div class="apt-meta"><div class="meta-pill">Pers: ${a.persons}</div><div class="meta-pill">Zahlung: ${a.payment}</div></div>
+  <div class="apt-notes">${this._esc(a.notes||"")}</div>
+  <div style="margin-top:.3rem;font-size:.9rem;color:var(--muted)">${this._esc(a.startAddr||"-")} → ${this._esc(a.zielAddr||"-")}</div>
+  <div class="apt-actions"><button class="btn-ghost" onclick="Planner.edit(${a.id})">✏️</button><button class="btn-danger" onclick="Planner.del(${a.id})">🗑️</button></div></div>`},
+ edit(id){const a=this.state.apts.find(x=>x.id==id);if(!a)return;$('#editId').value=a.id;$('#name').value=a.name;$('#phone').value=a.phone;$('#date').value=a.date;$('#time').value=a.time;$('#persons').value=a.persons;$('#payment').value=a.payment;$('#notes').value=a.notes;$('#startAddr').value=a.startAddr;$('#zielAddr').value=a.zielAddr;window.scrollTo({top:0,behavior:"smooth"})},
+ del(id){if(confirm("Löschen?")){this.state.apts=this.state.apts.filter(a=>a.id!=id);this._save(STORAGE.apts,this.state.apts);this._renderList()}},
+ clearAll(){if(confirm("Alle löschen?")){this.state.apts=[];this._save(STORAGE.apts,[]);this._renderList()}},
+ resetForm(){$('#aptForm').reset();$('#editId').value="";$('#date').value=new Date().toISOString().slice(0,10)},
+ checkReminders(){const now=Date.now();for(const a of this.state.apts){if(a.reminded)continue;if(!a.date||!a.time)continue;const t=this._dt(a).getTime();const remindAt=t-1800000;if(now>=remindAt&&now<t){a.reminded=true;this._save(STORAGE.apts,this.state.apts);this._triggerReminder(a);}}},
+ _triggerReminder(a){const when=a.date+" "+a.time;const msg=`${a.name} — ${when}`;this._showBanner(msg);this._startAlarm();if("Notification"in window){if(Notification.permission==="granted")new Notification("Erinnerung", {body:msg});else if(Notification.permission!=="denied"&&!this.notifRequested){this.notifRequested=true;Notification.requestPermission();}}},
+ _showBanner(text){const b=$('#reminderBanner');b.innerHTML=`<span>${text}</span><button class="btn-primary" onclick="Planner._confirmReminder()">OK</button>`;b.classList.add("show")},
+ _confirmReminder(){const b=$('#reminderBanner');b.classList.remove("show");this._stopAlarm()},
+ _startAlarm(){if(this.activeReminder)return;this.activeReminder=setInterval(()=>this._beep(),3000);this._beep()},
+ _stopAlarm(){clearInterval(this.activeReminder);this.activeReminder=null},
+ _beep(){try{const Ctx=window.AudioContext||window.webkitAudioContext;const ctx=new Ctx();const osc=ctx.createOscillator();const g=ctx.createGain();osc.frequency.value=880;osc.connect(g);g.connect(ctx.destination);osc.start();g.gain.setValueAtTime(.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);osc.stop(ctx.currentTime+.5);setTimeout(()=>ctx.close(),600);}catch{}},
+ _dt(a){if(!a.date)return null;const [y,m,d]=a.date.split("-").map(Number);const [hh,mm]=a.time.split(":").map(Number);return new Date(y,m-1,d,hh,mm)},
+ _esc(s){return (s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+};
+window.addEventListener("load",()=>Planner.init());
+</script>
+</body>
+</html>
