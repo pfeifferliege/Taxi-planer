@@ -1,54 +1,258 @@
-   <!DOCTYPE html>
+  Code kopieren
+Html
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Terminplaner – Freundlich & Mobil</title>
+  <title>Terminplaner</title>
   <style>
-    :root{
-      --bg:#f6f8fb;
-      --card:#ffffff;
-      --accent:#2563eb;
-      --muted:#6b7280;
-      --danger:#e11d48;
-      --border:#e6e9ef;
-      --radius:12px;
-      --shadow: 0 6px 20px rgba(16,24,40,0.06);
-      --reminder-bg:#fff7cc;
-      --reminder-border:#ffd24d;
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-light: #e0e7ff;
+      --muted: #6b7280;
+      --danger: #dc2626;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s ease;
+      --reminder-bg: #fff7cc;
+      --reminder-border: #ffd24d;
     }
-    body{margin:0;padding:1rem;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:#111827}
-    .container{max-width:1100px;margin:0 auto}
-    h1{font-size:1.4rem;margin:0 0 1rem}
-    .layout{display:grid;grid-template-columns:1fr 420px;gap:1rem}
-    @media(max-width:980px){.layout{grid-template-columns:1fr}}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem}
-    .label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
-    input,select,textarea{width:100%;padding:.45rem .6rem;border:1px solid var(--border);border-radius:8px;font-size:1rem}
-    input:focus,select:focus,textarea:focus{outline:2px solid rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.25)}
-    .row{display:flex;gap:.6rem}
-    .row>div{flex:1}
-    .actions{display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap}
-    button{border:0;border-radius:8px;padding:.45rem .7rem;font-size:.95rem;cursor:pointer}
-    .btn-primary{background:var(--accent);color:#fff}
-    .btn-ghost{background:#f3f4f6}
-    .btn-danger{background:var(--danger);color:#fff}
-    .hr{height:1px;background:var(--border);margin:.8rem 0}
-    .pill{display:inline-block;background:#eef2ff;color:#1e3a8a;padding:.2rem .6rem;border-radius:999px;font-weight:600;font-size:.85rem}
-    .list-title{margin:.7rem 0 .4rem;font-weight:700;color:#1e293b}
-    .apt-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:.8rem;margin-bottom:.6rem;box-shadow:0 4px 12px rgba(16,24,40,0.03)}
-    .apt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;flex-wrap:wrap}
-    .apt-name{font-weight:700;font-size:1rem}
-    .apt-time{font-size:.95rem;color:var(--muted);margin-top:.2rem;text-align:right}
-    .apt-meta{margin-top:.45rem;color:#374151;font-size:.92rem;display:flex;gap:.6rem;flex-wrap:wrap}
-    .meta-pill{background:#f1f5f9;padding:.2rem .5rem;border-radius:8px;font-weight:600;color:#0f172a}
-    .apt-notes{margin-top:.5rem;color:var(--muted);font-size:.9rem}
-    .apt-actions{display:flex;gap:.4rem;margin-top:.6rem;justify-content:flex-end}
-    .small{font-size:.85rem;color:var(--muted)}
-    #reminderBanner{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:var(--reminder-bg);border:1px solid var(--reminder-border);padding:.9rem 1rem;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.12);display:none;z-index:9999;font-weight:700;color:#1f2937;max-width:92%}
-    #reminderBanner.show{display:flex;justify-content:space-between;align-items:center;gap:.8rem;animation:pulse 1s ease-in-out infinite}
-    #reminderBanner button{flex-shrink:0}
-    @keyframes pulse{0%{box-shadow:0 0 0 rgba(255,210,77,0.12)}50%{box-shadow:0 12px 30px rgba(255,210,77,0.22)}100%{box-shadow:0 0 0 rgba(255,210,77,0.12)}}
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: #111827;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #1e293b;
+      text-align: center;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.2rem 1rem;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 4px;
+      margin-top: 0.7rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: var(--transition);
+      background: #f9fafb;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-ghost {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-ghost:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .pill {
+      display: inline-block;
+      background: var(--accent-light);
+      color: #1e3a8a;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .list-title {
+      margin: 1rem 0 0.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+    }
+
+    .apt-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 4px 10px rgba(16, 24, 40, 0.04);
+      transition: var(--transition);
+    }
+
+    .apt-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .apt-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .apt-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .apt-time {
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .apt-meta {
+      margin-top: 0.5rem;
+      color: #374151;
+      font-size: 0.92rem;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      background: #f1f5f9;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .apt-notes {
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .apt-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+      justify-content: flex-end;
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    #reminderBanner {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 1rem;
+      background: var(--reminder-bg);
+      border: 1px solid var(--reminder-border);
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(16, 24, 40, 0.12);
+      display: none;
+      z-index: 9999;
+      font-weight: 600;
+      color: #1f2937;
+      max-width: 92%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    #reminderBanner.show {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(255, 210, 77, 0.1); }
+      50% { box-shadow: 0 8px 30px rgba(255, 210, 77, 0.25); }
+    }
   </style>
 </head>
 <body>
